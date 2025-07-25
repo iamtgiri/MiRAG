@@ -119,8 +119,7 @@ MiRaGS/
 
 ## 📄 License
 
-MIT License © 2025 MiRaGS Contributors
-
----
+MIT License © 2025 Tanmoy Giri
+See [LICENSE](LICENSE) for details.
 
 
