@@ -83,20 +83,20 @@ Built on LangChain, Gemini (Google Generative AI), and FAISS, MiRaGS enables use
 ```
 MiRaGS/
 ├── app.py                      # Main Streamlit app
-├── pdf_utils.py
-├── process_youtube.py  
-├── rag_utils.py               # All utility functions & chain builders
+├── pdf_utils.py                # PDF loading, splitting & summarization
+├── process_youtube.py          # YouTube video processing & transcript extraction
+├── rag_utils.py                # All utility functions & chain builders
 └── README.md
 ├── requirements.txt
 ```
 
 ---
 
-## 📸 Screenshots
+<!-- ## 📸 Screenshots
 
 > (Include screenshots or gifs if you want visual documentation)
 
----
+--- -->
 
 ## ✅ To-Do / Roadmap
 
