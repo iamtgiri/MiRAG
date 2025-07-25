@@ -49,7 +49,7 @@ Built on LangChain, Gemini (Google Generative AI), and FAISS, MiRaGS enables use
    ```bash
    git clone https://github.com/iamtgiri/MiRaGS.git
    cd MiRaGS
-````
+    ```
 
 2. **Create virtual environment:**
 
