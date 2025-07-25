@@ -119,7 +119,7 @@ MiRaGS/
 
 ## 📄 License
 
-MIT License © 2025 Tanmoy Giri
+MIT License © 2025 Tanmoy Giri \
 See [LICENSE](LICENSE) for details.
 
 
