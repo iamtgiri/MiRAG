@@ -18,9 +18,22 @@ from pdf_utils import (
 from process_youtube import process_youtube_video
 
 
-st.set_page_config(page_title="Multi-Source RAG QA", layout="wide")
-st.title("MiRAG")
-st.subheader("Multi-input Retrieval-Augmented Generation System")
+# --- App Configuration ---
+st.set_page_config(
+    page_title="MiRAG – Multi-Source RAG QA",
+    layout="wide",
+    page_icon="🧠"
+)
+
+# --- App Header ---
+st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>MiRAG</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<h4 style='text-align: center; color: gray; margin-top: 0;'>"
+    "Multi-input Retrieval-Augmented Generation System"
+    "</h4>",
+    unsafe_allow_html=True
+)
+
 # Initialize session state
 for key in [
     "vectorstore", "chain", "history", "raw_docs", "max_memory",
@@ -32,60 +45,68 @@ st.session_state.max_memory = 3
 
 
 # Tabs for Web, PDF, YouTube, and Custom Text QA
-tab_custom, tab_web, tab_pdf, tab_youtube = st.tabs([
-    "Custom Text QA", "Web QA", "PDF QA", "YouTube QA"
-])
 # tab_custom, tab_web, tab_pdf, tab_youtube = st.tabs([
-#     "   Custom Text QA   ",
-#     "       Web QA       ",
-#     "       PDF QA       ",
-#     "    YouTube QA      "
+#     "Custom Text QA", "Web QA", "PDF QA", "YouTube QA"
 # ])
+# ---------------------------------------------------------------------
+# Replace st.tabs with a selectbox
+page = st.selectbox(
+    label="Select a data source for Retrieval-Augmented Question Answering:",
+    options=["Custom Text QA", "Web QA", "PDF QA", "YouTube QA"],
+    index=0,
+    format_func=lambda x: x,  # Keep proper case for readability
+)
 
-
+# ---------------------------------------------------------------------
 # --- 📝 Custom Text QA Tab ---
-with tab_custom:
+# with tab_custom:
+if page == "Custom Text QA":
     st.header("Custom Text-Based QA")
 
-    # Initialize default chatbot (no vectorstore) if not already done
+    # Initialize default chain if needed (no vectorstore)
     if "default_manual_chain" not in st.session_state:
         try:
-            st.session_state.default_manual_chain = build_qa_chain(None)  # Pass None or use an LLM-only chain
+            st.session_state.default_manual_chain = build_qa_chain(None)
             st.session_state.manual_history = []
         except Exception as e:
-            st.error(f"Failed to initialize default chatbot: {e}")
+            st.error(f"Failed to initialize chatbot: {e}")
 
-    st.markdown("You can chat directly, or optionally paste custom text to build a RAG-based QA system.")
+    st.markdown("Chat directly or optionally paste custom text to build a context-aware QA system.")
+    
+    use_custom_text = st.checkbox("Use Custom Text for RAG", value=False)
 
-    with st.form("manual_text_form"):
-        manual_text = st.text_area("Paste your text below (optional)", height=150,
-                                   placeholder="Leave blank to use general chatbot. Paste any large text for RAG.")
-        submitted = st.form_submit_button("Process Text")
+    if use_custom_text:
+        with st.form("manual_text_form"):
+            manual_text = st.text_area(
+                "Paste your text below",
+                height=150,
+                placeholder="Leave blank to use general chatbot. Paste any large text for RAG."
+            )
+            submitted = st.form_submit_button("Process Text")
 
-        if submitted:
-            if manual_text.strip():
-                with st.spinner("Processing input text and building vectorstore..."):
+            if submitted:
+                with st.spinner("Processing input text..."):
                     try:
-                        vs = create_vectorstore_from_text(manual_text)
-                        st.session_state.manual_chain = build_qa_chain(vs)
+                        if manual_text.strip():
+                            vs = create_vectorstore_from_text(manual_text)
+                            st.session_state.manual_chain = build_qa_chain(vs)
+                            st.success("Custom text processed and QA chain created.")
+                        else:
+                            st.session_state.manual_chain = st.session_state.default_manual_chain
+                            st.info("No text provided. Using default chatbot.")
                         st.session_state.manual_history = []
-                        st.success("Custom text processed and RAG chain created.")
                     except Exception as e:
                         st.error(f"Failed to process text: {e}")
-            else:
-                st.session_state.manual_chain = st.session_state.default_manual_chain
-                st.session_state.manual_history = []
-                st.info("Using default chatbot mode (no custom text).")
 
-    # Use either the default or custom chain
-    current_chain = st.session_state.get("manual_chain", st.session_state.get("default_manual_chain"))
+    # Use the appropriate QA chain
+    current_chain = st.session_state.get("manual_chain") or st.session_state.get("default_manual_chain")
 
     if current_chain:
         st.subheader("Ask a Question")
         manual_q = st.text_input("Your Question", key="manual_q")
 
         if st.button("Get Answer", key="manual_a") and manual_q:
-            with st.spinner("Thinking..."):
+            with st.spinner("Generating answer..."):
                 try:
                     memory_context = "\n\n".join(
                         [f"Q: {q}\nA: {a}" for q, a in st.session_state.manual_history[-st.session_state.max_memory:]]
@@ -96,21 +117,22 @@ with tab_custom:
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-        for q, a in st.session_state.manual_history[::-1]:
+        # Display past Q&A
+        for q, a in reversed(st.session_state.manual_history):
             st.markdown(f"**Q:** {q}")
             st.markdown(f"**A:** {a}")
             st.markdown("---")
 
-        # --- Optional Download Button ---
-        if st.session_state.get("manual_history"):
+        # Optionally offer PDF download of chat
+        if st.session_state.manual_history:
             st.subheader("Download Chat History")
             try:
-                buffer = generate_chat_pdf_buffer(st.session_state["manual_history"])
+                buffer = generate_chat_pdf_buffer(st.session_state.manual_history)
                 timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 filename = f"manual_chat_history_{timestamp}.pdf"
 
                 st.download_button(
-                    label="Download Chat History PDF",
+                    label="Download Chat History as PDF",
                     data=buffer,
                     file_name=filename,
                     mime="application/pdf",
@@ -121,12 +143,13 @@ with tab_custom:
 
 
 # --- 🌐 Web URL QA Tab ---
-with tab_web:
+# with tab_web:
+elif page == "Web QA":
     st.header("Web-Based RAG Question Answering")
 
     with st.form("url_form"):
         url = st.text_input("Enter URL to analyze", placeholder="https://...")
-        use_selenium = st.checkbox("Use Selenium Loader")
+        use_selenium = st.checkbox("Use Selenium Loader (for javascript-heavy pages)", value=False)
         submitted = st.form_submit_button("Load URL and Build Vectorstore")
 
         if submitted and url:
@@ -177,7 +200,8 @@ with tab_web:
         st.warning("⚠️ Load a URL first.")
 
 # --- 📄 PDF QA Tab ---
-with tab_pdf:
+# with tab_pdf:
+elif page == "PDF QA":
     st.header("PDF-Based QA & Summarization")
 
     pdf_file = st.file_uploader("Upload PDF", type=["pdf"])
@@ -249,7 +273,8 @@ with tab_pdf:
         st.info("Upload a PDF to begin.")
 
 # --- 📺 YouTube QA Tab ---
-with tab_youtube:
+# with tab_youtube:
+elif page == "YouTube QA":
     st.header("YouTube Video QA & Summarization")
 
     yt_url = st.text_input("Enter YouTube Video URL")
@@ -313,3 +338,16 @@ with tab_youtube:
                     st.markdown(summary)
                 except Exception as e:
                     st.error(f"Error generating summary: {e}")
+
+# --- Footer ---
+st.markdown("---")
+st.markdown(
+    """
+    <div style='text-align: center; font-size: 0.9em; color: gray;'>
+    <a href='https://github.com/iamtgiri/MiRAG' target='_blank' style='text-decoration: none; color: inherit;'><strong>MiRAG</strong></a>
+         is an open-source project developed by 
+        <a href='https://github.com/iamtgiri' target='_blank' style='text-decoration: none; color: inherit;'> Tanmoy Giri</a>.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
