@@ -80,7 +80,21 @@ def create_vectorstore_from_url(url: str, use_selenium: bool = False):
 
     return vectorstore, docs  # also return raw docs for summary
 
-def build_qa_chain(vectorstore):
+chatprompt = PromptTemplate(
+    template="""
+You are a helpful and knowledgeable assistant. 
+Provide concise, accurate answers based on your understanding.
+
+Question: {question}
+Answer:""",
+    input_variables=["question"]
+)
+
+
+def build_qa_chain(vectorstore = None):
+    if vectorstore is None:
+        return chatprompt | model | parser
+    
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
     parallel_chain = RunnableParallel({
@@ -112,3 +126,16 @@ def generate_chat_pdf_buffer(chat_history):
 
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
     return BytesIO(pdf_bytes)
+
+from langchain.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings  # or your embedding model
+from langchain.schema import Document
+
+def create_vectorstore_from_text(text: str):
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    docs = splitter.split_text(text)
+    wrapped_docs = [Document(page_content=d) for d in docs]
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    vectorstore = FAISS.from_documents(wrapped_docs, embeddings)
+    return vectorstore
