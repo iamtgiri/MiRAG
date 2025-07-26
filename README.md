@@ -1,7 +1,7 @@
 
-# 🔍 MiRaGS — Multi-input Retrieval-Augmented Generation System
+# 🔍 MiRAG — Multi-input Retrieval-Augmented Generation
 
-**MiRaGS** is an interactive, multi-modal application built with Streamlit that leverages Retrieval-Augmented Generation (RAG) to perform question-answering and summarization across various content types:
+**MiRAG** is an interactive, multi-modal application built with Streamlit that leverages Retrieval-Augmented Generation (RAG) to perform question-answering and summarization across various content types:
 
 - 🌐 Web pages  
 - 📄 PDF documents  
@@ -47,8 +47,8 @@ Built on LangChain, Gemini (Google Generative AI), and FAISS, MiRaGS enables use
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/iamtgiri/MiRaGS.git
-   cd MiRaGS
+   git clone https://github.com/iamtgiri/MiRAG.git
+   cd MiRAG
     ```
 
 2. **Create virtual environment:**
@@ -81,7 +81,7 @@ Built on LangChain, Gemini (Google Generative AI), and FAISS, MiRaGS enables use
 ## 📁 Project Structure
 
 ```
-MiRaGS/
+MiRAG/
 ├── app.py                      # Main Streamlit app
 ├── pdf_utils.py                # PDF loading, splitting & summarization
 ├── process_youtube.py          # YouTube video processing & transcript extraction
