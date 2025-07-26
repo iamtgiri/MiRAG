@@ -18,7 +18,7 @@ from process_youtube import process_youtube_video
 
 
 st.set_page_config(page_title="Multi-Source RAG QA", layout="wide")
-st.title("MiRaGS")
+st.title("MiRAG")
 st.subheader("Multi-input Retrieval-Augmented Generation System")
 # Initialize session state
 for key in [
@@ -160,11 +160,12 @@ with tab_pdf:
     else:
         st.info("Upload a PDF to begin.")
 
-# --- Youtube QA Tab ---
+# --- 📺 YouTube QA Tab ---
 with tab_youtube:
     st.header("📺 YouTube Video QA & Summarization")
 
     yt_url = st.text_input("Enter YouTube Video URL")
+
     if st.button("Load Transcript"):
         with st.spinner("Fetching and processing transcript..."):
             try:
@@ -183,9 +184,8 @@ with tab_youtube:
         if st.button("Get Answer", key="yt_a") and yt_q:
             with st.spinner("Thinking..."):
                 try:
-                    memory_context = "\n\n".join(
-                        [f"Q: {q}\nA: {a}" for q, a in st.session_state.yt_history[-st.session_state.max_memory:]]
-                    )
+                    memory_context = "\n\n".join([f"Q: {q}\nA: {a}"
+                                                  for q, a in st.session_state.yt_history[-st.session_state.max_memory:]])
                     full_q = f"{memory_context}\n\n{yt_q}" if memory_context else yt_q
                     answer = st.session_state.yt_chain.invoke(full_q)
                     st.session_state.yt_history.append((yt_q, answer))
@@ -196,8 +196,26 @@ with tab_youtube:
             st.markdown(f"**Q:** {q}")
             st.markdown(f"**A:** {a}")
             st.markdown("---")
+        # --- Download YouTube Chat History Button ---
+        if st.session_state.get("yt_history"):
+            st.subheader("📥 Download YouTube Chat History")
 
-        st.subheader("Summarize Transcript")
+            try:
+                buffer = generate_chat_pdf_buffer(st.session_state["yt_history"])
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                filename = f"youtube_chat_history_{timestamp}.pdf"
+
+                st.download_button(
+                    label="📥 Download Chat History PDF",
+                    data=buffer,
+                    file_name=filename,
+                    mime="application/pdf",
+                    key="download_yt_pdf_btn"
+                )
+            except Exception as e:
+                st.error(f"❌ Failed to generate PDF: {e}")
+
+        st.subheader("Summarize Video Transcript")
         if st.button("Summarize Video"):
             with st.spinner("Summarizing..."):
                 try:
