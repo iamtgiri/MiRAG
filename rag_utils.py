@@ -1,20 +1,23 @@
 # rag_utils.py
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import SeleniumURLLoader, WebBaseLoader
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from fpdf import FPDF
-from datetime import datetime
-import os
-import tempfile
-from dotenv import load_dotenv
 
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda
+from langchain_community.document_loaders import SeleniumURLLoader, WebBaseLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import PromptTemplate
+from reportlab.lib.pagesizes import letter
+from langchain.vectorstores import FAISS
+from langchain.schema import Document
+from reportlab.pdfgen import canvas
+from dotenv import load_dotenv
+from datetime import datetime
 from io import BytesIO
+from fpdf import FPDF
+import tempfile
+import os
+
 
 def load_with_selenium(urls):
     loader = SeleniumURLLoader(urls=urls)
@@ -28,17 +31,19 @@ def format_doc(retriever_docs):
     return "\n\n".join(doc.page_content for doc in retriever_docs)
 
 load_dotenv()
-
+google_api_key = os.getenv("GOOGLE_API_KEY")
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash-lite",
     temperature=0.3,
-    max_output_tokens=512
+    max_output_tokens=512,
+    google_api_key = google_api_key
 )
 
 summary_model = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash-lite",
-    temperature=0.3,
-    max_output_tokens=1500   # You can adjust this
+    temperature=0.5,
+    google_api_key = google_api_key,
+    max_output_tokens=2500   # You can adjust this
 )
 
 parser = StrOutputParser()
@@ -109,8 +114,6 @@ def build_summary_chain():
     return summary_prompt | summary_model | parser
 
 
-
-
 def generate_chat_pdf_buffer(chat_history):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -126,11 +129,6 @@ def generate_chat_pdf_buffer(chat_history):
 
     pdf_bytes = pdf.output(dest='S').encode('latin-1')
     return BytesIO(pdf_bytes)
-
-from langchain.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings  # or your embedding model
-from langchain.schema import Document
 
 def create_vectorstore_from_text(text: str):
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
