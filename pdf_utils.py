@@ -74,7 +74,7 @@ Summary:""",
     summary_model = ChatGoogleGenerativeAI(
         model="gemini-2.0-flash-lite",
         temperature=0.3,
-        max_output_tokens=2000
+        max_output_tokens=2500
     )
 
     parser = StrOutputParser()
