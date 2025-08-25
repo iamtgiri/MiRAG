@@ -63,8 +63,8 @@ Answer:""",
 # PDF Summary
 def build_pdf_summary_chain():
     summary_prompt = PromptTemplate(
-        template="""You are a summarization expert. Given the following content, generate a comprehensive, concise summary that captures the key points.
-
+        template="""You are an expert summarization system. Your task is to generate a large, comprehensive and detailed summary of the provided content. The summary must be thorough yet well-structured, retaining all crucial information, context, nuances, and supporting details.
+context:
 {context}
 
 Summary:""",
