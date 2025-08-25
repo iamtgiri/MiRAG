@@ -1,6 +1,6 @@
 # app.py
+
 import streamlit as st
-import os
 from datetime import datetime
 
 from rag_utils import (
@@ -15,12 +15,12 @@ from pdf_utils import (
     build_pdf_qa_chain,
     build_pdf_summary_chain
 )
-from process_youtube import process_youtube_video
+from youtube_utils import process_youtube_video
 
 
 # --- App Configuration ---
 st.set_page_config(
-    page_title="MiRAG – Multi-Source RAG QA",
+    page_title="MiRAG",
     layout="wide",
     page_icon="🧠"
 )
@@ -44,12 +44,8 @@ for key in [
 st.session_state.max_memory = 3
 
 
-# Tabs for Web, PDF, YouTube, and Custom Text QA
-# tab_custom, tab_web, tab_pdf, tab_youtube = st.tabs([
-#     "Custom Text QA", "Web QA", "PDF QA", "YouTube QA"
-# ])
+
 # ---------------------------------------------------------------------
-# Replace st.tabs with a selectbox
 page = st.selectbox(
     label="Select a data source for Retrieval-Augmented Question Answering:",
     options=["Custom Text QA", "Web QA", "PDF QA", "YouTube QA"],
@@ -59,7 +55,6 @@ page = st.selectbox(
 
 # ---------------------------------------------------------------------
 # --- 📝 Custom Text QA Tab ---
-# with tab_custom:
 if page == "Custom Text QA":
     st.header("Custom Text-Based QA")
 
@@ -143,7 +138,6 @@ if page == "Custom Text QA":
 
 
 # --- 🌐 Web URL QA Tab ---
-# with tab_web:
 elif page == "Web QA":
     st.header("Web-Based RAG Question Answering")
 
@@ -200,7 +194,6 @@ elif page == "Web QA":
         st.warning("⚠️ Load a URL first.")
 
 # --- 📄 PDF QA Tab ---
-# with tab_pdf:
 elif page == "PDF QA":
     st.header("PDF-Based QA & Summarization")
 
@@ -273,7 +266,6 @@ elif page == "PDF QA":
         st.info("Upload a PDF to begin.")
 
 # --- 📺 YouTube QA Tab ---
-# with tab_youtube:
 elif page == "YouTube QA":
     st.header("YouTube Video QA & Summarization")
 

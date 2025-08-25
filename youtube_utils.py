@@ -1,4 +1,4 @@
-# process_youtube.py
+# youtube_utils.py
 
 import re
 from youtube_transcript_api import YouTubeTranscriptApi

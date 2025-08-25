@@ -31,6 +31,7 @@ def format_doc(retriever_docs):
     return "\n\n".join(doc.page_content for doc in retriever_docs)
 
 load_dotenv()
+
 google_api_key = os.getenv("GOOGLE_API_KEY")
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash-lite",
@@ -43,34 +44,44 @@ summary_model = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash-lite",
     temperature=0.5,
     google_api_key = google_api_key,
-    max_output_tokens=2500   # You can adjust this
+    max_output_tokens=2500
 )
 
 parser = StrOutputParser()
 
 prompt = PromptTemplate(
-    template="""
-You are an expert assistant with deep domain knowledge. Based only on the provided context, generate a detailed, well-structured explanation that fully answers the question. If the context is insufficient to answer, just say you don't know. Use clear reasoning, relevant facts and examples from the context wherever applicable.
+        template="""
+        You are an expert assistant with deep domain knowledge. Based only on the provided context, generate a detailed, well-structured explanation that fully answers the question. If the context is insufficient to answer, just say you don't know. Use clear reasoning, relevant facts and examples from the context wherever applicable.
 
-Context:
-{context}
+        Context:
+        {context}
 
-Question: {question}
+        Question: {question}
 
-Detailed Answer:""",
-    input_variables=["context", "question"]
-)
+        Detailed Answer:""",
+            input_variables=["context", "question"]
+        )
 
 summary_prompt = PromptTemplate(
-    template="""
-You are an expert summarization system. Your task is to generate a large, comprehensive and detailed summary of the provided content. The summary must be thorough yet well-structured, retaining all crucial information, context, nuances, and supporting details.
+        template="""
+        You are an expert summarization system. Your task is to generate a large, comprehensive and detailed summary of the provided content. The summary must be thorough yet well-structured, retaining all crucial information, context, nuances, and supporting details.
 
-Content:
-{context}
+        Content:
+        {context}
 
-Summary:""",
-    input_variables=["context"]
-)
+        Summary:""",
+            input_variables=["context"]
+        )
+
+chatprompt = PromptTemplate(
+        template="""
+        You are a helpful and knowledgeable assistant. 
+        Provide concise, accurate answers based on your understanding.
+
+        Question: {question}
+        Answer:""",
+            input_variables=["question"]
+        )
 
 def create_vectorstore_from_url(url: str, use_selenium: bool = False):
     urls = [url]
@@ -83,17 +94,7 @@ def create_vectorstore_from_url(url: str, use_selenium: bool = False):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     vectorstore = FAISS.from_texts(texts, embeddings)
 
-    return vectorstore, docs  # also return raw docs for summary
-
-chatprompt = PromptTemplate(
-    template="""
-You are a helpful and knowledgeable assistant. 
-Provide concise, accurate answers based on your understanding.
-
-Question: {question}
-Answer:""",
-    input_variables=["question"]
-)
+    return vectorstore, docs
 
 
 def build_qa_chain(vectorstore = None):
