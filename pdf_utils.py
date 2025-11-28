@@ -47,7 +47,7 @@ Answer:""",
     )
 
     model = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash-lite",
+        model="gemini-2.5-flash",
         temperature=0.3,
         max_output_tokens=600
     )
@@ -73,7 +73,7 @@ Summary:""",
     )
 
     summary_model = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.0-flash",
         temperature=0.3,
         max_output_tokens=2500
     )

@@ -7,15 +7,15 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
-from reportlab.lib.pagesizes import letter
-from langchain.vectorstores import FAISS
+# from reportlab.lib.pagesizes import letter
+# from langchain.vectorstores import FAISS
 from langchain.schema import Document
-from reportlab.pdfgen import canvas
+# from reportlab.pdfgen import canvas
 from dotenv import load_dotenv
-from datetime import datetime
+# from datetime import datetime
 from io import BytesIO
 from fpdf import FPDF
-import tempfile
+# import tempfile
 import os
 
 
@@ -34,17 +34,17 @@ load_dotenv()
 
 google_api_key = os.getenv("GOOGLE_API_KEY")
 model = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash-lite",
+    model="gemini-2.5-flash",
     temperature=0.3,
-    max_output_tokens=512,
+    # max_output_tokens=512,
     google_api_key = google_api_key
 )
 
 summary_model = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash-lite",
+    model="gemini-2.5-pro",
     temperature=0.5,
     google_api_key = google_api_key,
-    max_output_tokens=2500
+    # max_output_tokens=2500
 )
 
 parser = StrOutputParser()
@@ -91,7 +91,7 @@ def create_vectorstore_from_url(url: str, use_selenium: bool = False):
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     texts = splitter.split_text(documents)
 
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
     vectorstore = FAISS.from_texts(texts, embeddings)
 
     return vectorstore, docs
@@ -135,6 +135,6 @@ def create_vectorstore_from_text(text: str):
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     docs = splitter.split_text(text)
     wrapped_docs = [Document(page_content=d) for d in docs]
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
     vectorstore = FAISS.from_documents(wrapped_docs, embeddings)
     return vectorstore
