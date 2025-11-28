@@ -48,8 +48,8 @@ Answer:""",
 
     model = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
-        temperature=0.3,
-        max_output_tokens=600
+        temperature=0.2,
+        # max_output_tokens=600
     )
 
     parser = StrOutputParser()
@@ -73,9 +73,9 @@ Summary:""",
     )
 
     summary_model = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0.3,
-        max_output_tokens=2500
+        model="gemini-2.5-pro",
+        temperature=0.5,
+        # max_output_tokens=2500
     )
 
     parser = StrOutputParser()
