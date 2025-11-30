@@ -21,7 +21,7 @@ def process_pdf(uploaded_file):
     pages = loader.load()
 
     # Split and return
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    # from langchain.text_splitter import RecursiveCharacterTextSplitter
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     split_docs = splitter.split_documents(pages)
 
@@ -30,7 +30,7 @@ def process_pdf(uploaded_file):
 
 # PDF QA
 def build_pdf_qa_chain(docs):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
     vectorstore = FAISS.from_documents(docs, embedding=embeddings)
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
